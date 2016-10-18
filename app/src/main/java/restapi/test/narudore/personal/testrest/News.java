@@ -1,7 +1,6 @@
 package restapi.test.narudore.personal.testrest;
 
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.internal.Streams;
 
 /**
  * Created by Ray on 10/17/2016.

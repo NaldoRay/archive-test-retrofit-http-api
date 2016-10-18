@@ -28,13 +28,12 @@ public class RestApiTest
     public static void setUp()
     {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-// set your desired log level
+        // set your desired log level
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-// add your other interceptors …
-
-// add logging as last interceptor
+        // add your other interceptors …
+        // add logging as last interceptor
         httpClient.addInterceptor(logging);  // <-- this is the important line!
 
         Retrofit retrofit = new Retrofit.Builder()
