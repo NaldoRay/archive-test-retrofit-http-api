@@ -34,7 +34,7 @@ public class RestApiTest
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         // add your other interceptors …
         // add logging as last interceptor
-        httpClient.addInterceptor(logging);  // <-- this is the important line!
+        httpClient.addInterceptor(logging);
 
         Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("http://localhost/testci3/")
@@ -46,7 +46,7 @@ public class RestApiTest
     }
 
     @Test
-    public void testGetNewsListShouldNotEmpty()
+    public void getNewsListShouldNotEmpty()
     {
         try
         {
@@ -61,11 +61,11 @@ public class RestApiTest
     }
 
     @Test
-    public void testGetNewsDetailShouldNotEmpty()
+    public void getNewsDetailShouldNotEmpty()
     {
         try
         {
-            Call<News> call = newsService.getNews(1);
+            Call<News> call = newsService.getNewsDetail(1);
             Response<News> response = call.execute();
             assertTrue(response.body().getTitle().length() > 0);
         }
@@ -76,13 +76,31 @@ public class RestApiTest
     }
 
     @Test
-    public void testGetWrongNewsDetailShouldEmpty()
+    public void getWrongNewsDetailShouldEmpty()
     {
         try
         {
-            Call<News> call = newsService.getNews(999);
+            Call<News> call = newsService.getNewsDetail(999);
             Response<News> response = call.execute();
             assertNull(response.body());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void postNewsWithoutTitleShouldFailed()
+    {
+        try
+        {
+            Call<ServiceResponse<Void>> call = newsService.postNews(null, "News content 1234567890");
+            Response<ServiceResponse<Void>> response = call.execute();
+
+            assertFalse(response.body().isSuccess());
+            assertNotNull(response.body().getErrors());
+            assertTrue(response.body().getErrors().length > 0);
         }
         catch (IOException e)
         {

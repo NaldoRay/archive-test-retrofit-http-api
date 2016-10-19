@@ -3,7 +3,10 @@ package restapi.test.narudore.personal.testrest;
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -17,5 +20,9 @@ interface NewsService
     Call<List<News>> getNewsList (@Path("page") int page, @Query("sort") String sort);
 
     @GET("api/news/{newsId}")
-    Call<News> getNews (@Path("newsId") int newsId);
+    Call<News> getNewsDetail (@Path("newsId") int newsId);
+
+    @FormUrlEncoded
+    @POST("api/news/post")
+    Call<ServiceResponse<Void>> postNews (@Field("title") String title, @Field("content") String content);
 }

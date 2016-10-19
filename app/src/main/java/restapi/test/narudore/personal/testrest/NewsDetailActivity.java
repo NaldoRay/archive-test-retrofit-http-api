@@ -10,7 +10,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class NewsDetail extends AppCompatActivity
+public class NewsDetailActivity extends AppCompatActivity
 {
     public static final String ARG_NEWS_ID = "news_id";
 
@@ -35,7 +35,7 @@ public class NewsDetail extends AppCompatActivity
             .build();
 
         NewsService newsService = retrofit.create(NewsService.class);
-        newsService.getNews(newsId).enqueue(new Callback<News>()
+        newsService.getNewsDetail(newsId).enqueue(new Callback<News>()
         {
             @Override
             public void onResponse (Call<News> call, Response<News> response)
