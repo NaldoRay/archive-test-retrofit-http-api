@@ -7,8 +7,7 @@ import android.widget.TextView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+
 
 public class NewsDetailActivity extends AppCompatActivity
 {
@@ -29,12 +28,8 @@ public class NewsDetailActivity extends AppCompatActivity
         Bundle args = getIntent().getExtras();
         int newsId = args.getInt(ARG_NEWS_ID);
 
-        Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("http://10.1.11.87/testci3/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build();
-
-        NewsService newsService = retrofit.create(NewsService.class);
+        MyApp app = (MyApp) getApplication();
+        NewsService newsService = app.createService(NewsService.class);
         newsService.getNewsDetail(newsId).enqueue(new Callback<News>()
         {
             @Override
