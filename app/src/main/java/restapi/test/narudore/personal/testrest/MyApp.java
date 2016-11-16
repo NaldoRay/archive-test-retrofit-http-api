@@ -2,7 +2,6 @@ package restapi.test.narudore.personal.testrest;
 
 import android.app.Application;
 
-import okhttp3.Protocol;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 

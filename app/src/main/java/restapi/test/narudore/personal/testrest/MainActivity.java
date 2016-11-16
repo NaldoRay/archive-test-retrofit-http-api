@@ -4,12 +4,13 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -17,13 +18,16 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements NewsAdapter.OnViewClickListener
 {
     private static final int REQUEST_POST_NEWS = 1213;
 
     private NewsService newsService;
-    private ArrayAdapter<News> newsAdapter;
+    private RecyclerView.Adapter newsAdapter;
     private FloatingActionButton postButton;
+
+    private static int page;
+    private List<News> newsList;
 
     @Override
     protected void onCreate (Bundle savedInstanceState)
@@ -42,30 +46,33 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        ListView listView = (ListView) findViewById(R.id.newsList);
-        newsAdapter = new ArrayAdapter<News>(MainActivity.this, android.R.layout.simple_list_item_1);
+
+        RecyclerView listView = (RecyclerView) findViewById(R.id.newsList);
+        listView.setLayoutManager(new LinearLayoutManager(this));
+
+        newsList = new ArrayList<>();
+        newsAdapter = new NewsAdapter(this, newsList, this);
         listView.setAdapter(newsAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        listView.addOnScrollListener(new RecyclerView.OnScrollListener()
         {
             @Override
-            public void onItemClick (AdapterView<?> parent, View view, int position, long id)
+            public void onScrolled (RecyclerView recyclerView, int dx, int dy)
             {
-                News news = newsAdapter.getItem(position);
-                Intent intent = new Intent(MainActivity.this, NewsDetailActivity.class);
-                intent.putExtra(NewsDetailActivity.ARG_NEWS_ID, news.getId());
-                startActivity(intent);
+                if (!recyclerView.canScrollVertically(1))
+                {
+                    Toast.makeText(MainActivity.this, "Mentok", Toast.LENGTH_SHORT).show();
+
+                    if (page > 0)
+                        loadNews();
+                }
             }
         });
 
         MyApp app = (MyApp) getApplication();
         newsService = app.createService(NewsService.class);
-    }
 
-    @Override
-    protected void onStart ()
-    {
-        super.onStart();
-        refreshNews();
+        page = 1;
+        loadNews();
     }
 
     @Override
@@ -75,22 +82,31 @@ public class MainActivity extends AppCompatActivity
 
         if (requestCode == REQUEST_POST_NEWS && resultCode == RESULT_OK)
         {
-            refreshNews();
+            page = 1;
+            loadNews();
         }
     }
 
-    private void refreshNews()
+    private void loadNews ()
     {
-        newsService.getNewsList(1, "desc").enqueue(new Callback<List<News>>()
+        newsService.getNewsList(page, "desc").enqueue(new Callback<List<News>>()
         {
             @Override
             public void onResponse (Call<List<News>> call, Response<List<News>> response)
             {
-                List<News> newsList = response.body();
+                List<News> list = response.body();
 
-                newsAdapter.clear();
-                newsAdapter.addAll(newsList);
-                newsAdapter.notifyDataSetChanged();
+                if (list.isEmpty())
+                    page = 0;
+                else
+                {
+                    if (page == 1)
+                        newsList.clear();
+                    page++;
+
+                    newsList.addAll(list);
+                    newsAdapter.notifyDataSetChanged();
+                }
             }
 
             @Override
@@ -99,5 +115,20 @@ public class MainActivity extends AppCompatActivity
                 Log.e("testrestapi", "failure", t);
             }
         });
+    }
+
+    @Override
+    public void onViewDetail (int position)
+    {
+        News news = newsList.get(position);
+        Intent intent = new Intent(MainActivity.this, NewsDetailActivity.class);
+        intent.putExtra(NewsDetailActivity.ARG_NEWS_ID, news.getId());
+        startActivity(intent);
+    }
+
+    @Override
+    public void onShare (int position)
+    {
+        Toast.makeText(this, "Share news #" + position, Toast.LENGTH_SHORT).show();
     }
 }
