@@ -4,7 +4,7 @@ android {
     compileSdkVersion 24
     buildToolsVersion "24.0.2"
     defaultConfig {
-        applicationId "restapi.test.narudore.personal.testrest"
+        applicationId "personal.narudore.test.android.testretrofit"
         minSdkVersion 15
         targetSdkVersion 24
         versionCode 1
