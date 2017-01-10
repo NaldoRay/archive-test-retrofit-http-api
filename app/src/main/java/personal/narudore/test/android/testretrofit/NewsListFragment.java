@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -29,11 +28,12 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnViewClic
     private static final int REQUEST_POST_NEWS = 1213;
 
     private NewsService newsService;
-    private RecyclerView.Adapter newsAdapter;
+    private NewsAdapter newsAdapter;
     private FloatingActionButton postButton;
 
     private static int page;
-    private List<News> newsList;
+
+    private boolean loading;
 
     @Nullable
     @Override
@@ -52,8 +52,7 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnViewClic
             }
         });
 
-        newsList = new ArrayList<>();
-        newsAdapter = new NewsAdapter(getContext(), newsList, this);
+        newsAdapter = new NewsAdapter(getContext(), this);
 
         RecyclerView listView = (RecyclerView) root.findViewById(R.id.newsList);
         listView.setAdapter(newsAdapter);
@@ -64,8 +63,6 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnViewClic
             {
                 if (!recyclerView.canScrollVertically(1))
                 {
-                    Toast.makeText(getContext(), "Mentok", Toast.LENGTH_SHORT).show();
-
                     if (page > 0)
                         loadNews();
                 }
@@ -95,6 +92,12 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnViewClic
 
     private void loadNews ()
     {
+        if (loading)
+            return;
+
+        loading = true;
+        newsAdapter.showLoadingSpinner();
+
         newsService.getNewsList(page, "desc").enqueue(new Callback<List<News>>()
         {
             @Override
@@ -103,22 +106,28 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnViewClic
                 List<News> list = response.body();
 
                 if (list.isEmpty())
+                {
                     page = 0;
+                }
                 else
                 {
                     if (page == 1)
-                        newsList.clear();
-                    page++;
+                        newsAdapter.clear();
 
-                    newsList.addAll(list);
-                    newsAdapter.notifyDataSetChanged();
+                    page++;
+                    newsAdapter.add(list);
                 }
+
+                loading = false;
+                newsAdapter.hideLoadingSpinner();
             }
 
             @Override
             public void onFailure (Call<List<News>> call, Throwable t)
             {
                 Log.e("testrestapi", "failure", t);
+                loading = false;
+                newsAdapter.hideLoadingSpinner();
             }
         });
     }
@@ -126,7 +135,7 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnViewClic
     @Override
     public void onViewDetail (int position)
     {
-        News news = newsList.get(position);
+        News news = newsAdapter.get(position);
         Intent intent = new Intent(getContext(), NewsDetailActivity.class);
         intent.putExtra(NewsDetailActivity.ARG_NEWS_ID, news.getId());
         startActivity(intent);
