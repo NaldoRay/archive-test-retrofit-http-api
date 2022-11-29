@@ -1,3 +1,5 @@
+Quick throwaway project to test retrofit for consuming HTTP API.
+
 ## Summary ##
 Project untuk testing penggunaan [Retrofit 2.0](http://square.github.io/retrofit/) untuk mengubah HTTP API jadi Java Interface.
 
